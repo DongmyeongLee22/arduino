@@ -1,9 +1,15 @@
 package com.example.windowproject;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
+
+import com.example.windowproject.activity.ConfigActivity;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,17 +27,32 @@ public class MainActivity extends AppCompatActivity {
     private List<Item> itemList;
     private ListView itemListView;
     private ItemAdapter itemAdapter;
-
+    private Button configBtn;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        context = this.getApplicationContext();
+
         setContentView(R.layout.activity_main);
         itemListView = findViewById(R.id.itemListView);
+        configBtn = (Button) findViewById(R.id.configBtn);
+
         itemList = new ArrayList<>();
         itemAdapter = new ItemAdapter(this.getApplicationContext(), itemList);
         itemListView.setAdapter(itemAdapter);
         itemRequest();
+
+        configBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, ConfigActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     class ItemRequest extends AsyncTask<Void, Void, String> {
