@@ -2,13 +2,8 @@ package com.example.windowproject.http.request;
 
 import android.os.AsyncTask;
 
-import com.example.windowproject.Item;
 import com.example.windowproject.common.Profile;
-import com.example.windowproject.common.StringUtils;
 import com.example.windowproject.domain.User;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -18,14 +13,11 @@ import java.net.URL;
 
 import lombok.Getter;
 
-import static com.example.windowproject.common.StringUtils.*;
-
 @Getter
 public class MemberConfigRequest extends AsyncTask<Void, Void, String> {
 
     private String name;
     private String urlStr;
-    private User user;
 
     public MemberConfigRequest(String name) {
         this.name = name;
@@ -34,7 +26,7 @@ public class MemberConfigRequest extends AsyncTask<Void, Void, String> {
     @Override
     protected void onPreExecute() {
         try {
-            urlStr = Profile.BASE_URL + "/member?name=" + name;
+            urlStr = Profile.BASE_URL + "/user?name=" + name;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -69,30 +61,4 @@ public class MemberConfigRequest extends AsyncTask<Void, Void, String> {
         super.onProgressUpdate();
     }
 
-    @Override
-    public void onPostExecute(String result) {
-        try {
-
-            System.out.println("================" + result);
-            JSONObject jsonObject = new JSONObject(result);
-            JSONArray jsonArray = jsonObject.getJSONArray("response");
-            JSONObject object = jsonArray.getJSONObject(0);
-
-            user = User.builder()
-                    .name(object.getString("name"))
-                    .checkedTemp(transToBoolean(object.getString("checkedTemp")))
-                    .closeWindowTemp(transToNumber(object.getString("closeWindowTemp")))
-                    .openWindowTemp(transToNumber(object.getString("openWindowTemp")))
-                    .checkedHumidity(transToBoolean(object.getString("checkedHumidity")))
-                    .closeWindowHumidity(transToNumber(object.getString("closeWindowHumidity")))
-                    .openWindowHumidity(transToNumber(object.getString("openWindowHumidity")))
-                    .checkedFineDust(transToBoolean(object.getString("checkedFineDust")))
-                    .closeWindowFineDust(transToNumber(object.getString("closeWindowFineDust")))
-                    .openWindowFineDust(transToNumber(object.getString("openWindowFineDust")))
-                    .build();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

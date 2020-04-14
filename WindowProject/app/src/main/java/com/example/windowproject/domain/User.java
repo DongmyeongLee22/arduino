@@ -1,5 +1,7 @@
 package com.example.windowproject.domain;
 
+import java.io.Serializable;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -7,7 +9,7 @@ import lombok.Getter;
 @Builder
 @Getter
 @AllArgsConstructor
-public class User {
+public class User implements Serializable {
     private String name;
 
     private boolean checkedTemp;

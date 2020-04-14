@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.windowproject.activity.ConfigActivity;
 import com.example.windowproject.http.request.MemberConfigRequest;
@@ -50,13 +51,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                MemberConfigRequest memberConfigRequest = new MemberConfigRequest("이혜은");
-                memberConfigRequest.execute();
+                try {
+                    MemberConfigRequest memberConfigRequest = new MemberConfigRequest("이혜은");
+                    String result = memberConfigRequest.execute().get();
 
-
-                Intent intent = new Intent(context, ConfigActivity.class);
-                intent.putExtra("user", memberConfigRequest.getUser());
-                startActivity(intent);
+                    Intent intent = new Intent(context, ConfigActivity.class);
+                    intent.putExtra("result", result);
+                    startActivity(intent);
+                }catch (Exception e){
+                    Toast.makeText(context, "다시 한 번더 시도해주세요", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
