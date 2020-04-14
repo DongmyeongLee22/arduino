@@ -4,7 +4,8 @@ import android.os.AsyncTask;
 
 import com.example.windowproject.Item;
 import com.example.windowproject.common.Profile;
-import com.example.windowproject.domain.Member;
+import com.example.windowproject.common.StringUtils;
+import com.example.windowproject.domain.User;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -15,11 +16,16 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import lombok.Getter;
+
+import static com.example.windowproject.common.StringUtils.*;
+
+@Getter
 public class MemberConfigRequest extends AsyncTask<Void, Void, String> {
 
     private String name;
     private String urlStr;
-    private Member member;
+    private User user;
 
     public MemberConfigRequest(String name) {
         this.name = name;
@@ -68,22 +74,22 @@ public class MemberConfigRequest extends AsyncTask<Void, Void, String> {
         try {
 
             System.out.println("================" + result);
-//            itemList.clear();
-//            JSONObject jsonObject = new JSONObject(result);
-//            JSONArray jsonArray = jsonObject.getJSONArray("response");
-//            JSONObject object = jsonArray.getJSONObject(0);
-//            String temperature, airQuality, fineDust, windowState, pdlcState;
-//
-//            temperature = object.getString("temperature");
-//            airQuality = object.getString("airQuality");
-//            fineDust = object.getString("fineDust");
-//            windowState = object.getString("windowState");
-//            pdlcState = object.getString("pdlcState");
-//
-//            Item item = new Item(temperature, airQuality, fineDust, windowState, pdlcState);
-//            itemList.add(item);
-//
-//            itemAdapter.notifyDataSetChanged();
+            JSONObject jsonObject = new JSONObject(result);
+            JSONArray jsonArray = jsonObject.getJSONArray("response");
+            JSONObject object = jsonArray.getJSONObject(0);
+
+            user = User.builder()
+                    .name(object.getString("name"))
+                    .checkedTemp(transToBoolean(object.getString("checkedTemp")))
+                    .closeWindowTemp(transToNumber(object.getString("closeWindowTemp")))
+                    .openWindowTemp(transToNumber(object.getString("openWindowTemp")))
+                    .checkedHumidity(transToBoolean(object.getString("checkedHumidity")))
+                    .closeWindowHumidity(transToNumber(object.getString("closeWindowHumidity")))
+                    .openWindowHumidity(transToNumber(object.getString("openWindowHumidity")))
+                    .checkedFineDust(transToBoolean(object.getString("checkedFineDust")))
+                    .closeWindowFineDust(transToNumber(object.getString("closeWindowFineDust")))
+                    .openWindowFineDust(transToNumber(object.getString("openWindowFineDust")))
+                    .build();
 
         } catch (Exception e) {
             e.printStackTrace();

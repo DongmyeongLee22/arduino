@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.example.windowproject.MainActivity;
 import com.example.windowproject.R;
+import com.example.windowproject.common.StringUtils;
 import com.example.windowproject.http.request.MemberConfigRequest;
 
 public class ConfigActivity extends AppCompatActivity {
@@ -49,12 +50,12 @@ public class ConfigActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try{
-                    int openTemp = validateNumber(openTemperature.getText().toString());
-                    int closeTemp = validateNumber(closeTemperature.getText().toString());
-                    int openHumi = validateNumber(openHumidity.getText().toString());
-                    int closeHumi = validateNumber(closeHumidity.getText().toString());
-                    int openFD = validateNumber(openFineDust.getText().toString());
-                    int closeFD = validateNumber(closeFineDust.getText().toString());
+                    int openTemp = StringUtils.transToNumber(openTemperature.getText().toString());
+                    int closeTemp = StringUtils.transToNumber(closeTemperature.getText().toString());
+                    int openHumi = StringUtils.transToNumber(openHumidity.getText().toString());
+                    int closeHumi = StringUtils.transToNumber(closeHumidity.getText().toString());
+                    int openFD = StringUtils.transToNumber(openFineDust.getText().toString());
+                    int closeFD = StringUtils.transToNumber(closeFineDust.getText().toString());
 
                     boolean checkedTemp = checkedTemperature.isChecked();
                     boolean checkedHumi = checkedHumidity.isChecked();
@@ -87,11 +88,5 @@ public class ConfigActivity extends AppCompatActivity {
 
     }
 
-    private int validateNumber(String string) throws IllegalAccessException {
-        try{
-            return Integer.parseInt(string);
-        }catch (NumberFormatException e){
-            throw new IllegalAccessException();
-        }
-    }
+
 }

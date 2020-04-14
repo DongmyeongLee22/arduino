@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import com.example.windowproject.activity.ConfigActivity;
+import com.example.windowproject.http.request.MemberConfigRequest;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -48,7 +49,13 @@ public class MainActivity extends AppCompatActivity {
         configBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                MemberConfigRequest memberConfigRequest = new MemberConfigRequest("이혜은");
+                memberConfigRequest.execute();
+
+
                 Intent intent = new Intent(context, ConfigActivity.class);
+                intent.putExtra("user", memberConfigRequest.getUser());
                 startActivity(intent);
             }
         });

@@ -18,11 +18,11 @@ public class ArduinoApplication {
     @RequiredArgsConstructor
     static class MyRunenr implements ApplicationRunner{
 
-        private final MemberRepository memberRepository;
+        private final UserRepository userRepository;
 
         @Override
         public void run(ApplicationArguments args) throws Exception {
-            Member member = Member.builder()
+            User user = User.builder()
                     .name("이혜은")
                     .checkedTemp(true)
                     .closeWindowTemp(0)
@@ -34,7 +34,7 @@ public class ArduinoApplication {
                     .openWindowFineDust(0)
                     .closeWindowFineDust(50)
                     .build();
-            memberRepository.save(member);
+            userRepository.save(user);
         }
     }
 
