@@ -3,6 +3,8 @@ package me.sun.arduino;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
+
 @RestController
 @RequiredArgsConstructor
 public class UserController {
@@ -17,6 +19,7 @@ public class UserController {
     }
 
     @PutMapping("/user")
+    @Transactional
     public User updateUser(@RequestBody User newUser){
         User user = userRepository.findByName(newUser.getName()).get();
         user.update(newUser);

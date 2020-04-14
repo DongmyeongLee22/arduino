@@ -10,10 +10,15 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
 import com.example.windowproject.MainActivity;
 import com.example.windowproject.R;
 import com.example.windowproject.common.StringUtils;
 import com.example.windowproject.domain.User;
+import com.example.windowproject.http.request.MemberConfigUpdateRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,7 +56,7 @@ public class ConfigActivity extends AppCompatActivity {
         homeBtn = (Button) findViewById(R.id.homeBtn);
 
 
-        User user = buildUser(getIntent().getStringExtra("result"));
+        final User user = buildUser(getIntent().getStringExtra("result"));
 
         landingConfigActivity(user);
 
@@ -65,21 +70,38 @@ public class ConfigActivity extends AppCompatActivity {
                     int closeHumi = StringUtils.transToNumber(closeHumidity.getText().toString());
                     int openFD = StringUtils.transToNumber(openFineDust.getText().toString());
                     int closeFD = StringUtils.transToNumber(closeFineDust.getText().toString());
-
                     boolean checkedTemp = checkedTemperature.isChecked();
                     boolean checkedHumi = checkedHumidity.isChecked();
                     boolean checkedFD = checkedFineDust.isChecked();
 
-                    System.out.println(openTemp);
-                    System.out.println(closeTemp);
-                    System.out.println(openHumi);
-                    System.out.println(closeHumi);
-                    System.out.println(openFD);
-                    System.out.println(closeFD);
+                    User updateUser = User.builder()
+                            .name(user.getName())
+                            .checkedTemp(checkedTemp)
+                            .closeWindowTemp(closeTemp)
+                            .openWindowTemp(openTemp)
+                            .checkedHumidity(checkedHumi)
+                            .closeWindowHumidity(closeHumi)
+                            .openWindowHumidity(openHumi)
+                            .checkedFineDust(checkedFD)
+                            .closeWindowFineDust(closeFD)
+                            .openWindowFineDust(openFD)
+                            .build();
 
-                    System.out.println("checkedTemp = " + checkedTemp);
-                    System.out.println("checkedHumi = " + checkedHumi);
-                    System.out.println("checkedFD = " + checkedFD);
+
+
+                    Response.Listener<JSONObject> responseListener = new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            User updatedUser = buildUser(response);
+                            Toast.makeText(context, "성공!", Toast.LENGTH_SHORT).show();
+                            landingConfigActivity(updatedUser);
+                        }
+                    };
+
+                    MemberConfigUpdateRequest memberConfigUpdateRequest = new MemberConfigUpdateRequest(Request.Method.PUT, new JSONObject(updateUser.toMap()) , responseListener, null);
+                    RequestQueue queue = Volley.newRequestQueue(v.getContext()); //Request를 실질적으로 보내는 Queue
+                    queue.add(memberConfigUpdateRequest);
+
 
                 } catch (IllegalAccessException e) {
                     Toast.makeText(context, "입력값을 확인해주세요. 숫자만 가능합니다.", Toast.LENGTH_SHORT).show();
@@ -97,11 +119,9 @@ public class ConfigActivity extends AppCompatActivity {
 
     }
 
-    private User buildUser(String result) {
-        JSONObject jsonObject = null;
+    private User buildUser(JSONObject jsonObject) {
         User user = null;
         try {
-            jsonObject = new JSONObject(result);
             user = User.builder()
                     .name(jsonObject.getString("name"))
                     .checkedTemp(transToBoolean(jsonObject.getString("checkedTemp")))
@@ -114,10 +134,22 @@ public class ConfigActivity extends AppCompatActivity {
                     .closeWindowFineDust(transToNumber(jsonObject.getString("closeWindowFineDust")))
                     .openWindowFineDust(transToNumber(jsonObject.getString("openWindowFineDust")))
                     .build();
-        } catch (JSONException | IllegalAccessException e) {
+    }catch (JSONException | IllegalAccessException e) {
+
             e.printStackTrace();
         }
         return user;
+    }
+
+    private User buildUser(String result){
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(result);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return buildUser(jsonObject);
     }
 
     private void landingConfigActivity(User user) {

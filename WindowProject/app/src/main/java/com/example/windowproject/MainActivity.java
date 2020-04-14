@@ -11,7 +11,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.windowproject.activity.ConfigActivity;
-import com.example.windowproject.http.request.MemberConfigRequest;
+import com.example.windowproject.http.request.MemberConfigFindRequest;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -52,8 +52,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 try {
-                    MemberConfigRequest memberConfigRequest = new MemberConfigRequest("이혜은");
-                    String result = memberConfigRequest.execute().get();
+                    MemberConfigFindRequest memberConfigFindRequest = new MemberConfigFindRequest("이혜은");
+                    String result = memberConfigFindRequest.execute().get();
 
                     Intent intent = new Intent(context, ConfigActivity.class);
                     intent.putExtra("result", result);
