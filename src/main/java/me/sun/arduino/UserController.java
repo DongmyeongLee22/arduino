@@ -16,5 +16,10 @@ public class UserController {
         return user;
     }
 
-
+    @PutMapping("/user")
+    public User updateUser(@RequestBody User newUser){
+        User user = userRepository.findByName(newUser.getName()).get();
+        user.update(newUser);
+        return user;
+    }
 }

@@ -31,4 +31,15 @@ public class User {
     private Integer closeWindowFineDust;
     private Integer openWindowFineDust;
 
+    public void update(User newUser) {
+        this.checkedTemp = newUser.checkedTemp;
+        this.closeWindowTemp = newUser.closeWindowTemp;
+        this.openWindowTemp = newUser.openWindowTemp;
+        this.checkedHumidity = newUser.checkedHumidity;
+        this.closeWindowHumidity = newUser.closeWindowHumidity;
+        this.openWindowHumidity = newUser.openWindowHumidity;
+        this.checkedFineDust = newUser.checkedFineDust;
+        this.closeWindowFineDust = newUser.closeWindowFineDust;
+        this.openWindowFineDust = newUser.openWindowFineDust;
+    }
 }
