@@ -1,51 +1,57 @@
 package com.example.windowproject;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
 import com.example.windowproject.activity.ConfigActivity;
+import com.example.windowproject.domain.MeasureValue;
+import com.example.windowproject.http.request.MeasureValueFindRequest;
 import com.example.windowproject.http.request.MemberConfigFindRequest;
 
-import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private List<Item> itemList;
-    private ListView itemListView;
-    private ItemAdapter itemAdapter;
-    private Button configBtn;
+    private Button configBtn, refreshBtn;
     private Context context;
+    private TextView temperature, humidity, fineDust, measureTime, isRain,timerTextView;
+    private RadioGroup timer_group;
+    private CountDownTimer countDownTimer;
 
+    private boolean timerReady;
+    private int count;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         context = this.getApplicationContext();
-
-        setContentView(R.layout.activity_main);
-        itemListView = findViewById(R.id.itemListView);
+        temperature = (TextView) findViewById(R.id.temperature);
+        humidity = (TextView) findViewById(R.id.humidity);
+        fineDust = (TextView) findViewById(R.id.fineDust);
+        measureTime = (TextView) findViewById(R.id.measureTime);
+        isRain = (TextView) findViewById(R.id.isRain);
         configBtn = (Button) findViewById(R.id.configBtn);
-
-        itemList = new ArrayList<>();
-        itemAdapter = new ItemAdapter(this.getApplicationContext(), itemList);
-        itemListView.setAdapter(itemAdapter);
-        itemRequest();
+        refreshBtn = (Button) findViewById(R.id.refreshBtn);
+        timer_group = (RadioGroup) findViewById(R.id.timer_group);
+        timerTextView = (TextView) findViewById(R.id.timerTextView);
+        timer_group = (RadioGroup) findViewById(R.id.timer_group);
 
         configBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,82 +64,75 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(context, ConfigActivity.class);
                     intent.putExtra("result", result);
                     startActivity(intent);
-                }catch (Exception e){
+                } catch (Exception e) {
                     Toast.makeText(context, "다시 한 번더 시도해주세요", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
-    }
 
-    class ItemRequest extends AsyncTask<Void, Void, String> {
-
-        private String my_url;
-
-        @Override
-        protected void onPreExecute() {
-            try {
-                my_url = "http://lehee0430.dothome.co.kr/iot.php";
-            } catch (Exception e) {
-                e.printStackTrace();
+        refreshBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                requestValues();
             }
-        }
+        });
 
-        @Override
-        protected String doInBackground(Void... voids) {
-            try {
-                URL url = new URL(my_url);
-                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-                InputStream inputStream = httpURLConnection.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                String temp;
-                StringBuilder stringBuilder = new StringBuilder();
-                while ((temp = bufferedReader.readLine()) != null) {
-                    stringBuilder.append(temp + "\n");
+
+        timer_group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                if (i == R.id.timer_10){
+                    if (timerReady) countDownTimer.cancel();
+                    count = 10 * 60;
+                    timerReady = true;
+                    initTimer(10 * 60 * 1000);
+                    countDownTimer.start();
+                }else if(i == R.id.timer_20){
+                    if (timerReady) countDownTimer.cancel();
+                    count = 20 * 60;
+                    timerReady = true;
+                    initTimer(20 * 60 * 1000);
+                    countDownTimer.start();
+                }else{
+                    timerReady = false;
+                    countDownTimer.cancel();
+                    timerTextView.setText("");
                 }
-                bufferedReader.close();
-                inputStream.close();
-                httpURLConnection.disconnect();
-                return stringBuilder.toString().trim();
-
-            } catch (Exception e) {
-                e.printStackTrace();
             }
-            return null;
-        }
+        });
 
-        @Override
-        public void onProgressUpdate(Void... values) {
-            super.onProgressUpdate();
-        }
-
-        @Override
-        public void onPostExecute(String result) {
-            try {
-                itemList.clear();
-                JSONObject jsonObject = new JSONObject(result);
-                JSONArray jsonArray = jsonObject.getJSONArray("response");
-                JSONObject object = jsonArray.getJSONObject(0);
-                String temperature, airQuality, fineDust, windowState, pdlcState;
-
-                temperature = object.getString("temperature");
-                airQuality = object.getString("airQuality");
-                fineDust = object.getString("fineDust");
-                windowState = object.getString("windowState");
-                pdlcState = object.getString("pdlcState");
-
-                Item item = new Item(temperature, airQuality, fineDust, windowState, pdlcState);
-                itemList.add(item);
-
-                itemAdapter.notifyDataSetChanged();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        requestValues();
     }
 
-    public void itemRequest(){
-        new ItemRequest().execute();
+    private void initTimer(int time){
+        countDownTimer = new CountDownTimer( time, 1000) {
+            public void onTick(long millisUntilFinished) {
+                // 600 -> 540 -> 480 ->   599
+                String second = String.valueOf((count % 60));
+                String minute = String.valueOf((count / 60));
+                timerTextView.setText(minute + ":" + second);
+                count --;
+            }
+            public void onFinish() {
+                timerTextView.setText("Finish");
+            }
+        };
     }
+
+    private void requestValues() {
+        new MeasureValueFindRequest(this).execute();
+    }
+
+    @SuppressLint("SetTextI18n")
+    public void reLanding(List<MeasureValue> measureValues) {
+        MeasureValue latestData = measureValues.get(0);
+        temperature.setText(latestData.getTemperature() + "도");
+        humidity.setText(latestData.getHumidity() +  "%");
+        fineDust.setText(latestData.getFineDust() + "μm");
+        measureTime.setText(latestData.getCreateDate());
+        isRain.setText(latestData.isRain() ? "내리는 중" : "내리지 않음");
+    }
+
+
 }

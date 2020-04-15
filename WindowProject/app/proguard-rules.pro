@@ -12,10 +12,10 @@
 #   public *;
 #}
 
-# Uncomment this to preserve the line number arduinoValue for
+# Uncomment this to preserve the line number measureValue for
 # debugging stack traces.
 #-keepattributes SourceFile,LineNumberTable
 
-# If you keep the line number arduinoValue, uncomment this to
+# If you keep the line number measureValue, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
