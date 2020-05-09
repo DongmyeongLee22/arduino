@@ -27,4 +27,9 @@ public class MeasureValueService {
         return values.getContent();
     }
 
+    public void save(MeasureValue measureValue) {
+        User user = userRepository.findByName("이혜은").get();
+        measureValue.setUser(user);
+        measureValueRepository.save(measureValue);
+    }
 }

@@ -18,18 +18,18 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MeasureValueFindRequest extends AsyncTask<Void, Void, String> {
+public class TwoSecondDateRequest extends AsyncTask<Void, Void, String> {
 
     private MainActivity mainActivity;
 
-    public MeasureValueFindRequest(MainActivity mainActivity) {
+    public TwoSecondDateRequest(MainActivity mainActivity) {
         this.mainActivity = mainActivity;
     }
 
     @Override
     protected String doInBackground(Void... voids) {
         try {
-            URL url = new URL(Profile.BASE_URL + "/values/이혜은");
+            URL url = new URL(Profile.BASE_URL + "/date");
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
             InputStream inputStream = httpURLConnection.getInputStream();
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -57,31 +57,12 @@ public class MeasureValueFindRequest extends AsyncTask<Void, Void, String> {
     @Override
     public void onPostExecute(String result) {
         try {
-            JSONArray jsonArray = new JSONArray(result);
-            List<MeasureValue> measureValues = build(jsonArray);
-            mainActivity.reLanding(measureValues);
+            JSONObject jsonObject = new JSONObject(result);
+
+            mainActivity.setTempDate(jsonObject.getString("localDateTime"));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private List<MeasureValue> build(JSONArray jsonArray) throws JSONException {
-        List<MeasureValue> measureValues = new ArrayList<>();
-        for (int i = 0; i < jsonArray.length(); i++) {
-            measureValues.add(build(jsonArray.getJSONObject(i)));
-        }
-
-        return measureValues;
-    }
-
-    private MeasureValue build(JSONObject jsonObject) throws JSONException {
-        String createDate = jsonObject.getString("createDate");
-        return MeasureValue.builder()
-                .createDate(createDate.substring(0, 16))
-                .temperature(jsonObject.getString("temperature"))
-                .humidity(jsonObject.getString("humidity"))
-                .fineDust(jsonObject.getString("fineDust"))
-                .isRain(jsonObject.getBoolean("rain"))
-                .build();
-    }
 }

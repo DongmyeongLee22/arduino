@@ -35,4 +35,8 @@ public class MeasureValue extends BaseEntity{
         this.isRain = isRain;
         this.user = user;
     }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }
