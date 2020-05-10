@@ -3,6 +3,7 @@ package com.example.windowproject.http.request;
 import android.os.AsyncTask;
 
 import com.example.windowproject.common.Profile;
+import com.example.windowproject.domain.WindowState;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -15,11 +16,26 @@ import lombok.Getter;
 @Getter
 public class WindowSetRequest extends AsyncTask<Void, Void, String> {
 
-    private String windowState;
+    private WindowState windowState;
     private String urlStr;
 
-    public WindowSetRequest(String windowState) {
-        this.windowState = windowState;
+    public WindowSetRequest(WindowState currentState) {
+        this.windowState = changeBy(currentState);
+    }
+
+    private WindowState changeBy(WindowState currentState) {
+        switch (currentState) {
+            case OPEN:
+                return WindowState.CLOSING;
+            case CLOSE:
+                return WindowState.OPENING;
+            case OPENING:
+                return WindowState.CLOSE;
+            case CLOSING:
+                return WindowState.OPEN;
+            default:
+                throw new IllegalArgumentException("Window State 확인 요망 " + windowState);
+        }
     }
 
     @Override

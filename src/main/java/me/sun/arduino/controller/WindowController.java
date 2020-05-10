@@ -27,6 +27,11 @@ public class WindowController {
         return new MessageDto(windowService.getWindowState());
     }
 
+    @GetMapping("/state")
+    public MessageDto queryByArduinoForWindowOperation(@RequestParam("name") String name) {
+        return new MessageDto(windowService.selectWindowStateForOperationBy(name));
+    }
+
     @AllArgsConstructor
     @Data
     static class MessageDto {

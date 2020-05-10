@@ -52,8 +52,8 @@ public class ArduinoApplication {
         private void newThreadWork(User user, MeasureValueRepository measureValueRepository) throws InterruptedException {
             while(true){
                 Random random = new Random();
-                int temp = random.nextInt(30);
-                int humidity = 10 + random.nextInt(40);
+                int temp = 10 + random.nextInt(20);
+                int humidity = 30 + random.nextInt(10);
                 int fineDust = 30 + random.nextInt(70);
                 int isRainAB = random.nextInt(10);
 
@@ -67,7 +67,7 @@ public class ArduinoApplication {
 
                 measureValueRepository.save(value);
 
-                TimeUnit.MINUTES.sleep(5);
+                TimeUnit.SECONDS.sleep(20);
             }
         }
 

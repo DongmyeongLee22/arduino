@@ -53,7 +53,6 @@ public class WindowStateFindRequest extends AsyncTask<Void, Void, String> {
     public void onPostExecute(String result) {
         try {
             JSONObject jsonObject = new JSONObject(result);
-
             mainActivity.setWindowState(jsonObject.getString("windowMessage"));
         } catch (Exception e) {
             e.printStackTrace();

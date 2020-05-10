@@ -17,18 +17,24 @@ import java.util.List;
 public class MeasureValueService {
 
     private final MeasureValueRepository measureValueRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
 
     public List<MeasureValue> findMeasureValues(String username){
-        User user = userRepository.findByName(username).get();
+        User user = userService.findUser(username);
         Page<MeasureValue> values = measureValueRepository.findMeasureValueWithUserByUsername(user.getId(),
                 PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createDate")));
         return values.getContent();
     }
 
+    public MeasureValue findLatestValue(Long userId) {
+        Page<MeasureValue> values = measureValueRepository
+            .findMeasureValueWithUserByUsername(userId, PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "createDate")));
+        return values.getContent().get(0);
+    }
+
     public void save(MeasureValue measureValue) {
-        User user = userRepository.findByName("이혜은").get();
+        User user = userService.findUser("이혜은");
         measureValue.setUser(user);
         measureValueRepository.save(measureValue);
     }

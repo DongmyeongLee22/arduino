@@ -21,6 +21,7 @@ public class UserService {
     }
 
     public User findUser(String name) {
-        return userRepository.findByName(name).get();
+        return userRepository.findByName(name)
+            .orElseThrow(() -> new IllegalArgumentException("name에 맞는 유저가 없다. name + " + name));
     }
 }

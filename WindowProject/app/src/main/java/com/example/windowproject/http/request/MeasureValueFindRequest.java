@@ -77,7 +77,7 @@ public class MeasureValueFindRequest extends AsyncTask<Void, Void, String> {
     private MeasureValue build(JSONObject jsonObject) throws JSONException {
         String createDate = jsonObject.getString("createDate");
         return MeasureValue.builder()
-                .createDate(createDate.substring(0, 16))
+                .createDate(createDate.substring(0, 19))
                 .temperature(jsonObject.getString("temperature"))
                 .humidity(jsonObject.getString("humidity"))
                 .fineDust(jsonObject.getString("fineDust"))

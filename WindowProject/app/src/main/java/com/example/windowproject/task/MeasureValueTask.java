@@ -1,5 +1,6 @@
-package com.example.windowproject;
+package com.example.windowproject.task;
 
+import com.example.windowproject.MainActivity;
 import com.example.windowproject.http.request.MeasureValueFindRequest;
 
 import java.util.TimerTask;
@@ -7,7 +8,7 @@ import java.util.TimerTask;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class RequestValueTask extends TimerTask {
+public class MeasureValueTask extends TimerTask {
 
     private MainActivity activity;
 

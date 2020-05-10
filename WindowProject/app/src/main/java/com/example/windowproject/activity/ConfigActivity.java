@@ -23,8 +23,8 @@ import com.example.windowproject.http.request.MemberConfigUpdateRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static com.example.windowproject.common.StringUtils.transToBoolean;
-import static com.example.windowproject.common.StringUtils.transToNumber;
+import static com.example.windowproject.common.StringUtils.transferToBoolean;
+import static com.example.windowproject.common.StringUtils.transferToNumber;
 
 public class ConfigActivity extends AppCompatActivity {
 
@@ -64,12 +64,12 @@ public class ConfigActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
-                    int openTemp = StringUtils.transToNumber(openTemperature.getText().toString());
-                    int closeTemp = StringUtils.transToNumber(closeTemperature.getText().toString());
-                    int openHumi = StringUtils.transToNumber(openHumidity.getText().toString());
-                    int closeHumi = StringUtils.transToNumber(closeHumidity.getText().toString());
-                    int openFD = StringUtils.transToNumber(openFineDust.getText().toString());
-                    int closeFD = StringUtils.transToNumber(closeFineDust.getText().toString());
+                    int openTemp = StringUtils.transferToNumber(openTemperature.getText().toString());
+                    int closeTemp = StringUtils.transferToNumber(closeTemperature.getText().toString());
+                    int openHumi = StringUtils.transferToNumber(openHumidity.getText().toString());
+                    int closeHumi = StringUtils.transferToNumber(closeHumidity.getText().toString());
+                    int openFD = StringUtils.transferToNumber(openFineDust.getText().toString());
+                    int closeFD = StringUtils.transferToNumber(closeFineDust.getText().toString());
                     boolean checkedTemp = checkedTemperature.isChecked();
                     boolean checkedHumi = checkedHumidity.isChecked();
                     boolean checkedFD = checkedFineDust.isChecked();
@@ -95,6 +95,7 @@ public class ConfigActivity extends AppCompatActivity {
                             User updatedUser = buildUser(response);
                             Toast.makeText(context, "성공!", Toast.LENGTH_SHORT).show();
                             landingConfigActivity(updatedUser);
+                            onBackPressed();
                         }
                     };
 
@@ -124,15 +125,15 @@ public class ConfigActivity extends AppCompatActivity {
         try {
             user = User.builder()
                     .name(jsonObject.getString("name"))
-                    .checkedTemp(transToBoolean(jsonObject.getString("checkedTemp")))
-                    .closeWindowTemp(transToNumber(jsonObject.getString("closeWindowTemp")))
-                    .openWindowTemp(transToNumber(jsonObject.getString("openWindowTemp")))
-                    .checkedHumidity(transToBoolean(jsonObject.getString("checkedHumidity")))
-                    .closeWindowHumidity(transToNumber(jsonObject.getString("closeWindowHumidity")))
-                    .openWindowHumidity(transToNumber(jsonObject.getString("openWindowHumidity")))
-                    .checkedFineDust(transToBoolean(jsonObject.getString("checkedFineDust")))
-                    .closeWindowFineDust(transToNumber(jsonObject.getString("closeWindowFineDust")))
-                    .openWindowFineDust(transToNumber(jsonObject.getString("openWindowFineDust")))
+                    .checkedTemp(transferToBoolean(jsonObject.getString("checkedTemp")))
+                    .closeWindowTemp(transferToNumber(jsonObject.getString("closeWindowTemp")))
+                    .openWindowTemp(transferToNumber(jsonObject.getString("openWindowTemp")))
+                    .checkedHumidity(transferToBoolean(jsonObject.getString("checkedHumidity")))
+                    .closeWindowHumidity(transferToNumber(jsonObject.getString("closeWindowHumidity")))
+                    .openWindowHumidity(transferToNumber(jsonObject.getString("openWindowHumidity")))
+                    .checkedFineDust(transferToBoolean(jsonObject.getString("checkedFineDust")))
+                    .closeWindowFineDust(transferToNumber(jsonObject.getString("closeWindowFineDust")))
+                    .openWindowFineDust(transferToNumber(jsonObject.getString("openWindowFineDust")))
                     .build();
     }catch (JSONException | IllegalAccessException e) {
 

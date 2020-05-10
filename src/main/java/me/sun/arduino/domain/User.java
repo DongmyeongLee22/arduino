@@ -64,4 +64,5 @@ public class User {
         this.closeWindowFineDust = newUser.closeWindowFineDust;
         this.openWindowFineDust = newUser.openWindowFineDust;
     }
+
 }

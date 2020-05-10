@@ -14,29 +14,52 @@ import android.widget.Toast;
 
 import com.example.windowproject.activity.ConfigActivity;
 import com.example.windowproject.domain.MeasureValue;
+import com.example.windowproject.domain.WindowState;
 import com.example.windowproject.http.request.MemberConfigFindRequest;
 import com.example.windowproject.http.request.WindowSetRequest;
-import com.example.windowproject.http.request.WindowStateFindRequest;
+import com.example.windowproject.task.MeasureValueTask;
+import com.example.windowproject.task.WindowStateTask;
 
 import org.json.JSONObject;
 
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutionException;
+
+import static com.example.windowproject.domain.WindowState.CLOSE;
+import static com.example.windowproject.domain.WindowState.CLOSING;
+import static com.example.windowproject.domain.WindowState.OPEN;
+import static com.example.windowproject.domain.WindowState.OPENING;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button configBtn, refreshBtn, windowButton;
+    private Button configBtn, windowButton;
     private Context context;
-    private TextView temperature, humidity, fineDust, measureTime, isRain, timerTextView, tempDate, windowText;
+    private TextView temperature, humidity, fineDust, measureTime, isRain, timerTextView, windowText;
     private RadioGroup timer_group;
     private CountDownTimer countDownTimer;
+    private TimerTask windowStateTask, measureValueTask;
 
     private boolean timerReady;
     private int count;
 
     private Timer timer;
+
+    @Override
+    protected void onStart() {
+        windowStateTask = new WindowStateTask(this);
+        measureValueTask = new MeasureValueTask(this);
+        doLoop(windowStateTask, 3000L);
+        doLoop(measureValueTask, 10000L);
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        windowStateTask.cancel();
+        measureValueTask.cancel();
+        super.onStop();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,12 +74,9 @@ public class MainActivity extends AppCompatActivity {
         measureTime = (TextView) findViewById(R.id.measureTime);
         isRain = (TextView) findViewById(R.id.isRain);
         configBtn = (Button) findViewById(R.id.configBtn);
-        refreshBtn = (Button) findViewById(R.id.refreshBtn);
         timer_group = (RadioGroup) findViewById(R.id.timer_group);
         timerTextView = (TextView) findViewById(R.id.timerTextView);
         timer_group = (RadioGroup) findViewById(R.id.timer_group);
-
-        tempDate = (TextView) findViewById(R.id.tempDate);
 
         windowText = (TextView) findViewById(R.id.window_text);
         windowButton = (Button) findViewById(R.id.window_button);
@@ -64,11 +84,9 @@ public class MainActivity extends AppCompatActivity {
         configBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 try {
                     MemberConfigFindRequest memberConfigFindRequest = new MemberConfigFindRequest("이혜은");
                     String result = memberConfigFindRequest.execute().get();
-
                     Intent intent = new Intent(context, ConfigActivity.class);
                     intent.putExtra("result", result);
                     startActivity(intent);
@@ -82,7 +100,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
-                    String result = new WindowSetRequest(parse(windowText.getText().toString())).execute().get();
+                    WindowState currentWindowState = WindowState.findBy(windowText.getText().toString());
+                    String result = new WindowSetRequest(currentWindowState).execute().get();
                     JSONObject jsonObject = new JSONObject(result);
                     setWindowState(jsonObject.getString("windowMessage"));
                 } catch (Exception e) {
@@ -91,9 +110,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
             private String parse(String prevState) {
-                if("창문 열림".equals(prevState)) {
+                if ("창문 열림".equals(prevState)) {
                     return "CLOSING";
-                }else if("창문 닫힘".equals(prevState)) {
+                } else if ("창문 닫힘".equals(prevState)) {
                     return "OPENING";
                 } else {
                     return "ERROR";
@@ -106,15 +125,17 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
                 if (i == R.id.timer_10) {
                     if (timerReady) countDownTimer.cancel();
-                    count = 10 * 60;
+                    int time = 10 * 60 * 1000;
+                    count = time / 1000;
                     timerReady = true;
-                    initTimer(10 * 60 * 1000);
+                    initTimer(time);
                     countDownTimer.start();
                 } else if (i == R.id.timer_20) {
                     if (timerReady) countDownTimer.cancel();
-                    count = 20 * 60;
+                    int time = 10 * 1000;
+                    count = time / 1000;
                     timerReady = true;
-                    initTimer(20 * 60 * 1000);
+                    initTimer(time);
                     countDownTimer.start();
                 } else {
                     timerReady = false;
@@ -123,11 +144,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
-        doLoop(new WindowStateTask(this), 3000L);
-        doLoop(new RequestValueTask(this), 15000L);
-        doLoop(new DateTask(this), 5000L);
-
     }
 
     private void doLoop(TimerTask timerTask, long period) {
@@ -146,7 +162,15 @@ public class MainActivity extends AppCompatActivity {
             }
 
             public void onFinish() {
-                timerTextView.setText("Finish");
+                try {
+                    WindowState currentWindowState = WindowState.findBy(windowText.getText().toString());
+                    String result = new WindowSetRequest(currentWindowState).execute().get();
+                    JSONObject jsonObject = new JSONObject(result);
+                    setWindowState(jsonObject.getString("windowMessage"));
+                    timerTextView.setText("정상적으로 처리되었습니다.");
+                }catch (Exception e) {
+                    timerTextView.setText("에러가 발생하여 동작되지 않았습니다.");
+                }
             }
         };
     }
@@ -161,18 +185,13 @@ public class MainActivity extends AppCompatActivity {
         isRain.setText(latestData.isRain() ? "내리는 중" : "내리지 않음");
     }
 
-
-    public void setTempDate(String localDateTime) {
-        tempDate.setText(localDateTime);
-    }
-
     public void setWindowState(String windowMessage) {
         windowText.setText(windowMessage);
-        if ("창문 여는중".equals(windowMessage) || "창문 닫는중".equals(windowMessage)) {
+        if (OPENING.getMessage().equals(windowMessage) || CLOSING.getMessage().equals(windowMessage)) {
             windowButton.setText("취소");
-        } else if ("창문 열림".equals(windowMessage)) {
+        } else if (OPEN.getMessage().equals(windowMessage)) {
             windowButton.setText("창문 닫기");
-        } else if ("창문 닫힘".equals(windowMessage)) {
+        } else if (CLOSE.getMessage().equals(windowMessage)) {
             windowButton.setText("창문 열기");
         }
     }

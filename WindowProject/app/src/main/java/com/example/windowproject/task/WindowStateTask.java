@@ -1,5 +1,6 @@
-package com.example.windowproject;
+package com.example.windowproject.task;
 
+import com.example.windowproject.MainActivity;
 import com.example.windowproject.http.request.WindowStateFindRequest;
 
 import java.util.TimerTask;

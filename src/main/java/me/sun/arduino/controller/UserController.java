@@ -9,15 +9,15 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
+  private final UserService userService;
 
-    @GetMapping("/user")
-    public User findMember(@RequestParam String name){
-        return userService.findUser(name);
-    }
+  @GetMapping("/user")
+  public User findMember(@RequestParam String name) {
+    return userService.findUser(name);
+  }
 
-    @PutMapping("/user")
-    public User updateUser(@RequestBody User newUser){
-        return userService.updateUser(newUser);
-    }
+  @PutMapping("/user")
+  public User updateUser(@RequestBody User newUser) {
+    return userService.updateUser(newUser);
+  }
 }
