@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         windowStateTask = new WindowStateTask(this);
         measureValueTask = new MeasureValueTask(this);
         doLoop(windowStateTask, 3000L);
-        doLoop(measureValueTask, 10000L);
+        doLoop(measureValueTask, 3000L);
         super.onStart();
     }
 

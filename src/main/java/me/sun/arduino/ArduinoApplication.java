@@ -13,8 +13,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication
@@ -37,16 +35,15 @@ public class ArduinoApplication {
             Optional<User> findUser = userRepository.findByName("이혜은");
 
             User user = saveUserIfNotPresent(findUser);
-
-
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.execute(() -> {
-                try {
-                    newThreadWork(user, measureValueRepository);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            });
+//
+//            ExecutorService executor = Executors.newSingleThreadExecutor();
+//            executor.execute(() -> {
+//                try {
+//                    newThreadWork(user, measureValueRepository);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            });
         }
 
         private void newThreadWork(User user, MeasureValueRepository measureValueRepository) throws InterruptedException {

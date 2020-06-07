@@ -19,7 +19,6 @@ public class WindowService {
 
   private final WindowRepository windowRepository;
   private final UserService userService;
-  private final MeasureValueService measureValueService;
 
   public String saveAndUpdate(@RequestParam(name = "windowState") WindowState windowState) {
     Optional<Window> optionalWindow = windowRepository.findById(1L);
@@ -28,7 +27,6 @@ public class WindowService {
     } else {
       windowRepository.save(new Window(windowState));
     }
-
     return windowState.getMessage();
   }
 
@@ -40,38 +38,43 @@ public class WindowService {
     return byId.get().getWindowState().getMessage();
   }
 
-  public String selectWindowStateForOperationBy(String name) {
+  public void changeWindowStateByMeasureValue(MeasureValue latestValue) {
     User user = userService.findUser("이혜은");
-    Window window = windowRepository.findById(1L)
-        .orElseThrow(() -> new IllegalArgumentException("windowState가 존재해야 한다."));
-    MeasureValue latestValue = measureValueService.findLatestValue(user.getId());
-    return selectWindowState(user, window, latestValue);
+    Optional<Window> byId = windowRepository.findById(1L);
+    Window window = null;
+    window = byId.orElseGet(() -> windowRepository.save(new Window(WindowState.CLOSE)));
+    changeWindowState(user, window, latestValue);
   }
 
-  private String selectWindowState(User user, Window window, MeasureValue measureValue) {
-    WindowState windowState = window.getWindowState();
-    if (windowState == WindowState.CLOSING)
-      return "CLOSE";
-    if (windowState == WindowState.OPENING)
-      // 비가오면 창문을 열고 있더라도 강제로 닫게한다.
-      return measureValue.isRain() ? "CLOSE" : "OPEN";
+  // 아두이노에게 해야할 행동을 알려줌
+  public String tellToArduinoNeedToBehavior() {
+    Window window = windowRepository.findById(1L)
+        .orElseThrow(() -> new IllegalArgumentException("windowState가 존재해야 한다."));
+    switch (window.getWindowState()) {
+      case OPENING:
+        return "OPEN";
+      case CLOSING:
+        return "CLOSE";
+      default:
+        return "NONE";
+    }
+  }
 
+  private void changeWindowState(User user, Window window, MeasureValue measureValue) {
+    WindowState windowState = window.getWindowState();
     if (windowState == WindowState.OPEN) {
       if (needClose(user, measureValue)) {
         window.setWindowState(WindowState.CLOSING);
-        return "CLOSE";
+        windowRepository.save(window);
       }
-      return "NONE";
     }
 
     if (windowState == WindowState.CLOSE) {
       if (needOpen(user, measureValue)) {
         window.setWindowState(WindowState.OPENING);
-        return "OPEN";
+        windowRepository.save(window);
       }
-      return "NONE";
     }
-    throw new IllegalArgumentException("windowstate 확인 요망. " + windowState);
   }
 
   private boolean needOpen(User user, MeasureValue currentValue) {
